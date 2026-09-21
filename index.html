@@ -13,7 +13,7 @@
   user-select: none;
 }
 body {
-  background-color: #121218;
+  background-color: write;
   min-height: 100vh;
   display: flex;
   justify-content: center;
@@ -670,7 +670,7 @@ function showFoodOptions() {
   const panel = document.getElementById('actionPanel');
   panel.innerHTML = `
     <button class="btn-option" onclick="selectFood('A')">A: 바퀴벌레</button>
-    <button class="btn-option" onclick="selectFood('B')">B: 아이스크림</button>
+    <button class="btn-option" onclick="selectFood('B')">B: 한식</button>
     <button class="btn-option" onclick="selectFood('C')">C: 똥</button>
   `;
 }
@@ -679,7 +679,7 @@ function selectFood(choice) {
   if (choice === 'B') {
     playSound('correct');
     document.getElementById('actionPanel').innerHTML = '';
-    document.getElementById('dialogText').innerText = "아이스크림 맛있죠.";
+    document.getElementById('dialogText').innerText = "한식 맛있죠.";
     isWaitingChoice = false;
     document.getElementById('nextIndicator').classList.remove('hidden');
   } else {
