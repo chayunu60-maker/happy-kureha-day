@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>쿠레하님의 특별한 생일 파티 🎉</title>
+<style>
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: 'NeoDunggeunmo', 'Apple SD Gothic Neo', 'Malgun Gothic', monospace, sans-serif;
+  user-select: none;
+}
+body {
+  background-color: #121218;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 10px;
+  color: #fff;
+}
+/* 닌텐도 DS 핑크 쉘 프레임 */
+.ds-console {
+  background: linear-gradient(145deg, #ffb6c1, #ff8da1);
+  border-radius: 30px;
+  padding: 20px 16px 24px 16px;
+  width: 100%;
+  max-width: 410px;
+  box-shadow: 0 15px 35px rgba(0,0,0,0.5), inset 0 3px 6px rgba(255,255,255,0.6);
+  border: 4px solid #f27a93;
+  position: relative;
+}
+/* 상단 상징 상표 영역 및 스피커 홀 */
+.ds-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 8px 12px 8px;
+}
+.speakers {
+  display: grid;
+  grid-template-columns: repeat(3, 4px);
+  gap: 3px;
+}
+.speaker-dot {
+  width: 4px;
+  height: 4px;
+  background-color: #d65874;
+  border-radius: 50%;
+}
+.ds-logo {
+  font-size: 11px;
+  font-weight: bold;
+  color: #b53855;
+  letter-spacing: 2px;
+}
+/* 화면 스크린 */
+.ds-screen {
+  background: #1c1c28;
+  border: 6px solid #2a2a3a;
+  border-radius: 12px;
+  height: 480px;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: inset 0 0 15px rgba(0,0,0,0.8);
+}
+/* 배경 레이어 (VIP 라운지 기본 탑재) */
+.screen-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  background-size: cover;
+  background-position: center;
+  transition: background-image 0.5s ease;
+  background-image: linear-gradient(rgba(0,0,0,0.65), rgba(0,0,0,0.75)),
+                    radial-gradient(circle, #3d2b4f 0%, #110d1a 100%);
+}
+
+/* 줄무늬 레드 커튼 (위로 올라가는 애니메이션 레이어) */
+.curtain-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 20;
+  background: repeating-linear-gradient(
+    90deg,
+    #a80d0d,
+    #a80d0d 20px,
+    #780808 20px,
+    #780808 40px
+  );
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 0 10px 20px rgba(0,0,0,0.6);
+  transition: transform 1.2s cubic-bezier(0.77, 0, 0.175, 1);
+}
+
+/* 커튼이 위로 올라가는 스타일 */
+.curtain-layer.open {
+  transform: translateY(-100%);
+}
+
+/* 메인 컨텐츠 영역 */
+.screen-content {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 16px;
+}
+
+/* 캐릭터 아바타 영역 */
+.avatar-container {
+  position: absolute;
+  right: 12px;
+  bottom: 120px;
+  width: 120px;
+  height: 140px;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  z-index: 3;
+  perspective: 600px;
+}
+
+/* 오카다 몸체 이미지 */
+.avatar-img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 5px 8px rgba(0,0,0,0.5));
+}
+
+/* 덧붙여지는 바퀴벌레 얼굴 이미지 (크기 확대: 75px) */
+.cockroach-face {
+  position: absolute;
+  top: 30px;         /* 얼굴 크기에 맞게 위치 미세조정 가능 */
+  left: 22px;        /* 얼굴 크기에 맞게 위치 미세조정 가능 */
+  width: 75px;
+  height: 75px;
+  object-fit: contain;
+  z-index: 4;
+}
+
+/* 회전하며 등장하는 애니메이션 */
+.cockroach-face.rotate-transform {
+  animation: spinSlideIn 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+@keyframes spinSlideIn {
+  0% {
+    transform: translateX(-150px) rotateY(-720deg) scale(0.2);
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(0) rotateY(0deg) scale(1);
+    opacity: 1;
+  }
+}
+
+/* 고정 대화창 박스 */
+.dialog-box {
+  position: absolute;
+  bottom: 12px;
+  left: 12px;
+  right: 12px;
+  background: rgb(29, 29, 29);
+  border: 3px solid #ff8da1;
+  border-radius: 14px;
+  padding: 12px 14px;
+  min-height: 110px;
+  z-index: 4;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+}
+.speaker-name {
+  display: inline-block;
+  background: #ff6b81;
+  color: #fff;
+  font-size: 12px;
+  font-weight: bold;
+  padding: 3px 10px;
+  border-radius: 10px;
+  margin-bottom: 6px;
+}
+.dialog-text {
+  font-size: 14px;
+  line-height: 1.5;
+  color: #f1f1f1;
+  word-break: keep-all;
+  min-height: 42px;
+}
+.next-indicator {
+  text-align: right;
+  font-size: 10px;
+  color: #ff8da1;
+  margin-top: 4px;
+  animation: blink 1s infinite;
+}
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.2; }
+}
+/* 선택지 및 입력 UI 고정 박스 */
+.action-panel {
+  position: absolute;
+  top: 50px;
+  left: 16px;
+  right: 16px;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.btn-option {
+  background: linear-gradient(180deg, #ff758c 0%, #ff7eb3 100%);
+  color: #fff;
+  border: 2px solid #fff;
+  padding: 12px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: bold;
+  text-align: left;
+  cursor: pointer;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+  transition: transform 0.1s;
+}
+.btn-option:active {
+  transform: scale(0.97);
+}
+/* 나이 선택 슬라이더 */
+.age-picker-container {
+  background: rgba(0, 0, 0, 0.85);
+  border: 2px solid #ff758c;
+  padding: 16px;
+  border-radius: 12px;
+  text-align: center;
+}
+.age-display {
+  font-size: 22px;
+  color: white;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+.age-slider {
+  width: 100%;
+  margin: 10px 0;
+  accent-color: #ff6b81;
+}
+.btn-submit {
+  background: #4caf50;
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  width: 100%;
+  margin-top: 8px;
+}
+/* 입장하기 큰 버튼 */
+.btn-enter {
+  background: #ffffff;
+  color: #a80d0d;
+  border: none;
+  padding: 16px 32px;
+  font-size: 18px;
+  font-weight: bold;
+  border-radius: 12px;
+  cursor: pointer;
+  box-shadow: 0 6px 0 #780808;
+}
+.btn-enter:active {
+  transform: translateY(4px);
+  box-shadow: 0 2px 0 #780808;
+}
+
+/* 케이크 및 엔딩 연출 레이어 (레이아웃 가독성 개선) */
+.cake-overlay {
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  z-index: 30;
+  background: rgba(10, 10, 18, 0.95);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 1.2s ease;
+}
+.cake-overlay.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+.cake-img {
+  width: 140px;
+  height: 140px;
+  object-fit: contain;
+  transition: transform 2.5s cubic-bezier(0.25, 1, 0.5, 1);
+  margin-bottom: 20px;
+}
+.cake-img.zoom {
+  transform: scale(1.3);
+}
+
+.end-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  opacity: 0;
+  transition: opacity 1s ease 1.8s;
+  z-index: 35;
+}
+.end-container.show {
+  opacity: 1;
+}
+
+.the-end-text {
+  font-size: 32px;
+  font-weight: bold;
+  color: #ffeb3b;
+  letter-spacing: 4px;
+  text-shadow: 0 0 12px rgba(255, 235, 59, 0.8);
+}
+
+/* 선물 링크 버튼 */
+.gift-btn {
+  background: linear-gradient(45deg, #ff4757, #ff6b81);
+  color: #fff;
+  text-decoration: none;
+  font-size: 15px;
+  font-weight: bold;
+  padding: 12px 24px;
+  border-radius: 30px;
+  box-shadow: 0 4px 15px rgba(255, 71, 87, 0.5);
+  transition: transform 0.2s;
+  display: inline-block;
+}
+.gift-btn:active {
+  transform: scale(0.95);
+}
+
+/* 닌텐도 하단 장식 버튼 */
+.ds-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 12px;
+  padding: 0 6px;
+}
+.mic-tag {
+  font-size: 10px;
+  color: #a5465a;
+  font-weight: bold;
+}
+.led-light {
+  width: 8px;
+  height: 8px;
+  background-color: #00ff66;
+  border-radius: 50%;
+  box-shadow: 0 0 6px #00ff66;
+}
+.hidden {
+  display: none !important;
+}
+</style>
+</head>
+<body>
+<!-- 닌텐도 DS 케이스 -->
+<div class="ds-console">
+<div class="ds-header">
+<div class="speakers">
+<div class="speaker-dot"></div><div class="speaker-dot"></div><div class="speaker-dot"></div>
+<div class="speaker-dot"></div><div class="speaker-dot"></div><div class="speaker-dot"></div>
+</div>
+<div class="ds-logo">NINTENDO DS</div>
+<div class="speakers">
+<div class="speaker-dot"></div><div class="speaker-dot"></div><div class="speaker-dot"></div>
+<div class="speaker-dot"></div><div class="speaker-dot"></div><div class="speaker-dot"></div>
+</div>
+</div>
+<!-- DS 화면 -->
+<div class="ds-screen" id="dsScreen">
+  <!-- 배경 라운지 -->
+  <div class="screen-bg" id="screenBg"></div>
+
+  <!-- 위로 올라가는 커튼 레이어 -->
+  <div class="curtain-layer" id="curtainLayer">
+    <button class="btn-enter" id="enterBtn" onclick="startStory()">입장하기</button>
+  </div>
+
+  <div class="screen-content hidden" id="mainContent">
+    <!-- 상단 행동/선택지 패널 -->
+    <div class="action-panel" id="actionPanel"></div>
+
+    <!-- 캐릭터 아바타 (오카다 몸 위에 바퀴벌레 얼굴) -->
+    <div class="avatar-container" id="avatarContainer">
+      <img src="" alt="Character Avatar" class="avatar-img" id="avatarImg">
+      <img src="" alt="Cockroach Face" class="cockroach-face hidden" id="cockroachFace">
+    </div>
+
+    <!-- 고정 대화 박스 -->
+    <div class="dialog-box" id="dialogBox" onclick="nextDialogue()">
+      <div class="speaker-name" id="speakerName">직원1</div>
+      <div class="dialog-text" id="dialogText">...</div>
+      <div class="next-indicator" id="nextIndicator">▶ 터치하여 계속</div>
+    </div>
+  </div>
+
+  <!-- 케이크 연출 레이어 -->
+  <div class="cake-overlay" id="cakeOverlay">
+    <img src="./케익.png" alt="Birthday Cake" class="cake-img" id="cakeImg">
+    <div class="end-container" id="endContainer">
+      <div class="the-end-text">The END</div>
+      <!-- 선물 링크 버튼 (원하는 주소로 수정 가능) -->
+      <a href="https://gift.kakao.com" target="_blank" class="gift-btn">🎁 생일 선물 보러가기!</a>
+    </div>
+  </div>
+</div>
+
+<div class="ds-footer">
+  <span class="mic-tag">| MIC</span>
+  <div class="led-light"></div>
+</div>
+</div>
+
+<script>
+/* ============================================================
+사진 / GIF 이미지 URL 커스텀 설정
+============================================================ */
+const IMAGE_CONFIG = {
+  staff1: "./직원1.png",         // 직원1 (강아지/안내원)
+  managerCharles: "./지배인.png",   // 지배인 찰스
+  okadaNormal: "./오카다.png",   // 오카다 (몸체)
+  okadaCockroach: "./바퀴벌레.png",   // 바퀴벌레 (얼굴 사진)
+  bgOkada: "./오카다만남.jpg",    // 배경 이미지 예시
+  bgwork: "./로비.jpg",
+  bgro: "./로비2.jpg"
+};
+
+/* 오디오 효과음 (Web Audio API) */
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+function playSound(type) {
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.connect(gain);
+  gain.connect(audioCtx.destination);
+  if (type === 'next') {
+    osc.frequency.setValueAtTime(400, audioCtx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(800, audioCtx.currentTime + 0.08);
+    gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+    gain.gain.linearRampToValueAtTime(0.01, audioCtx.currentTime + 0.08);
+    osc.start(); osc.stop(audioCtx.currentTime + 0.08);
+  } else if (type === 'wrong') {
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(180, audioCtx.currentTime);
+    osc.frequency.setValueAtTime(110, audioCtx.currentTime + 0.15);
+    gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+    gain.gain.linearRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+    osc.start(); osc.stop(audioCtx.currentTime + 0.3);
+  } else if (type === 'correct') {
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(523, audioCtx.currentTime);
+    osc.frequency.setValueAtTime(659, audioCtx.currentTime + 0.1);
+    osc.frequency.setValueAtTime(783, audioCtx.currentTime + 0.2);
+    gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+    gain.gain.linearRampToValueAtTime(0.01, audioCtx.currentTime + 0.35);
+    osc.start(); osc.stop(audioCtx.currentTime + 0.35);
+  } else if (type === 'transform') {
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(200, audioCtx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(1200, audioCtx.currentTime + 0.4);
+    gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+    gain.gain.linearRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
+    osc.start(); osc.stop(audioCtx.currentTime + 0.4);
+  }
+}
+
+/* 시나리오 상태 데이터 */
+let currentStep = 0;
+let isWaitingChoice = false;
+
+// 시나리오 정의 (원하는 대화마다 bg: "./이미지.png" 형태로 배경 지정 가능)
+const scriptData = [
+  // [0~4] 직원1 안내 (입장후)
+  { speaker: "직원1", text: "어서오세요...엇?", avatar: IMAGE_CONFIG.staff1, bg: "./로비.jpg" },
+  { speaker: "직원1", text: "아! 오늘 VVVVVVVIP로 예약하신 쿠레하님 맞으십니까?", avatar: IMAGE_CONFIG.staff1 },
+  { speaker: "직원1", text: "오카다님이 매우 귀중한 손님이라고 잘 모시라고 하셨거든요..", avatar: IMAGE_CONFIG.staff1 },
+  { speaker: "직원1", text: "잠시만요.. 입장하기 전에..", avatar: IMAGE_CONFIG.staff1 },
+  { speaker: "직원1", text: "오카다님께서 몇 가지 확인을 요청하셨습니다!!\n죄송합니다만 양해 부탁드립니다.", avatar: IMAGE_CONFIG.staff1 },
+  // [5] 장소 전환 안내
+  { speaker: "시스템", text: "[ VIP 확인실로 이동합니다... ]", avatar: "" },
+  // [6~7] 지배인 찰스 등장
+  { speaker: "지배인 찰스", text: "안녕하세요. 본인확인 담당자입니다.", avatar: IMAGE_CONFIG.managerCharles, bg: "./로비2.jpg"  },
+  { speaker: "지배인 찰스", text: "지금부터 몇 가지 문제를 드릴테니 맞히시면 됩니다.", avatar: IMAGE_CONFIG.managerCharles },
+  // [8] Q1. 나이 입력
+  { speaker: "지배인 찰스", text: "1. 손님 나이가 어떻게 되십니까?", avatar: IMAGE_CONFIG.managerCharles, questionType: "age" },
+  // [9] Q2. 취미
+  { speaker: "지배인 찰스", text: "2. 취미가 어떻게 되십니까?", avatar: IMAGE_CONFIG.managerCharles, questionType: "hobby" },
+  // [10] Q3. 좋아하는 음식
+  { speaker: "지배인 찰스", text: "마지막 질문입니다.\n3. 좋아하는 음식은?", avatar: IMAGE_CONFIG.managerCharles, questionType: "food" },
+  // [11~13] 퀴즈 완료 및 오카다 등장
+  { speaker: "지배인 찰스", text: "확인 정말 감사합니다. 안내해드리겠습니다.", avatar: IMAGE_CONFIG.managerCharles },
+  { speaker: "오카다", text: "안녕 쿠레하", avatar: IMAGE_CONFIG.okadaNormal, bg: "./오카다만남.jpg" }, // 대화 시 배경 변경 예시
+  { speaker: "오카다", text: "생일 축하해..", avatar: IMAGE_CONFIG.okadaNormal },
+  { speaker: "오카다", text: "아 잠만.", avatar: IMAGE_CONFIG.okadaNormal },
+  // [15] 변신!
+  { speaker: "오카다", text: "너가 좋아하는 얼굴로 얘기할게", avatar: IMAGE_CONFIG.okadaNormal, showCockroachFace: true, triggerTransform: true },
+  { speaker: "오카다", text: "우리가 2023년에 만났는데 벌써 2026년이구나", avatar: IMAGE_CONFIG.okadaNormal, showCockroachFace: true },
+  { speaker: "오카다", text: "너랑 처음에는 이렇게 친해질 줄은 몰랐는데 계속 좋은 친구로 지내서 너무 좋아", avatar: IMAGE_CONFIG.okadaNormal, showCockroachFace: true },
+  { speaker: "오카다", text: "오늘 생일 정말 축하해! happy birthday 🎉", avatar: IMAGE_CONFIG.okadaNormal, showCockroachFace: true, isFinal: true }
+];
+
+function startStory() {
+  playSound('next');
+  // 커튼 위로 올리기 애니메이션
+  const curtain = document.getElementById('curtainLayer');
+  curtain.classList.add('open');
+  
+  // 커튼 올라간 후 메인 콘텐츠 표시
+  document.getElementById('mainContent').classList.remove('hidden');
+  renderStep();
+}
+
+function renderStep() {
+  const data = scriptData[currentStep];
+  if (!data) return;
+  isWaitingChoice = false;
+  document.getElementById('actionPanel').innerHTML = '';
+  document.getElementById('nextIndicator').classList.remove('hidden');
+
+  // 대화마다 배경(bg) 지정 시 배경 이미지 변경 처리
+  if (data.bg) {
+    const screenBg = document.getElementById('screenBg');
+    screenBg.style.backgroundImage = `url('${data.bg}')`;
+  }
+
+  // 대화창 업데이트
+  document.getElementById('speakerName').innerText = data.speaker;
+  document.getElementById('dialogText').innerText = data.text;
+
+  // 캐릭터 아바타 및 바퀴벌레 얼굴 덧붙이기 처리
+  const avatarImg = document.getElementById('avatarImg');
+  const cockroachFace = document.getElementById('cockroachFace');
+
+  if (data.avatar) {
+    avatarImg.src = data.avatar;
+    document.getElementById('avatarContainer').classList.remove('hidden');
+  } else {
+    document.getElementById('avatarContainer').classList.add('hidden');
+  }
+
+  // 바퀴벌레 얼굴 덧붙이기
+  if (data.showCockroachFace) {
+    cockroachFace.src = IMAGE_CONFIG.okadaCockroach;
+    cockroachFace.classList.remove('hidden');
+
+    if (data.triggerTransform) {
+      playSound('transform');
+      cockroachFace.classList.remove('rotate-transform');
+      void cockroachFace.offsetWidth;
+      cockroachFace.classList.add('rotate-transform');
+    }
+  } else {
+    cockroachFace.classList.add('hidden');
+    cockroachFace.classList.remove('rotate-transform');
+  }
+
+  // 인터랙션 (나이 입력 / 퀴즈)
+  if (data.questionType === "age") {
+    showAgeInput();
+  } else if (data.questionType === "hobby") {
+    showHobbyOptions();
+  } else if (data.questionType === "food") {
+    showFoodOptions();
+  }
+}
+
+function nextDialogue() {
+  if (isWaitingChoice) return;
+  playSound('next');
+  const data = scriptData[currentStep];
+  if (data && data.isFinal) {
+    showFinalCake();
+    return;
+  }
+  currentStep++;
+  if (currentStep < scriptData.length) {
+    renderStep();
+  }
+}
+
+/* 1. 나이 선택 UI */
+function showAgeInput() {
+  isWaitingChoice = true;
+  document.getElementById('nextIndicator').classList.add('hidden');
+  const panel = document.getElementById('actionPanel');
+  panel.innerHTML = `
+    <div class="age-picker-container">
+      <div class="age-display" id="ageVal">20 살</div>
+      <input type="range" min="10" max="40" value="20" class="age-slider" id="ageSlider" oninput="document.getElementById('ageVal').innerText = this.value + ' 살'">
+      <button class="btn-submit" onclick="submitAge()">확인 제출</button>
+    </div>
+  `;
+}
+
+function submitAge() {
+  const selectedAge = parseInt(document.getElementById('ageSlider').value);
+  if (selectedAge >= 18 && selectedAge <= 21) {
+    playSound('correct');
+    document.getElementById('actionPanel').innerHTML = '';
+    document.getElementById('dialogText').innerText = `[승인 완료] ${selectedAge}살 쿠레하님 본인 확인되었습니다.`;
+    isWaitingChoice = false;
+    document.getElementById('nextIndicator').classList.remove('hidden');
+  } else {
+    playSound('wrong');
+    document.getElementById('dialogText').innerText = "이상하다 정보랑 다른데요? 다시한번 확인해 주실래요?";
+  }
+}
+
+/* 2. 취미 선택지 UI */
+function showHobbyOptions() {
+  isWaitingChoice = true;
+  document.getElementById('nextIndicator').classList.add('hidden');
+  const panel = document.getElementById('actionPanel');
+  panel.innerHTML = `
+    <button class="btn-option" onclick="selectHobby('A')">A: 집에서 뒹굴뒹굴</button>
+    <button class="btn-option" onclick="selectHobby('B')">B: 즐겁게 공부하기</button>
+    <button class="btn-option" onclick="selectHobby('C')">C: 맨날 밖에 나가서 놀기</button>
+  `;
+}
+
+function selectHobby(choice) {
+  if (choice === 'A') {
+    playSound('correct');
+    document.getElementById('actionPanel').innerHTML = '';
+    document.getElementById('dialogText').innerText = "히키코모리시군요.";
+    isWaitingChoice = false;
+    document.getElementById('nextIndicator').classList.remove('hidden');
+  } else if (choice === 'B') {
+    playSound('wrong');
+    document.getElementById('dialogText').innerText = "그럴수가..";
+  } else {
+    playSound('wrong');
+    document.getElementById('dialogText').innerText = "체력 좋으시네요.";
+  }
+}
+
+/* 3. 음식 선택지 UI */
+function showFoodOptions() {
+  isWaitingChoice = true;
+  document.getElementById('nextIndicator').classList.add('hidden');
+  const panel = document.getElementById('actionPanel');
+  panel.innerHTML = `
+    <button class="btn-option" onclick="selectFood('A')">A: 바퀴벌레</button>
+    <button class="btn-option" onclick="selectFood('B')">B: 아이스크림</button>
+    <button class="btn-option" onclick="selectFood('C')">C: 똥</button>
+  `;
+}
+
+function selectFood(choice) {
+  if (choice === 'B') {
+    playSound('correct');
+    document.getElementById('actionPanel').innerHTML = '';
+    document.getElementById('dialogText').innerText = "아이스크림 맛있죠.";
+    isWaitingChoice = false;
+    document.getElementById('nextIndicator').classList.remove('hidden');
+  } else {
+    playSound('wrong');
+    document.getElementById('dialogText').innerText = "웩... 더러워..";
+  }
+}
+
+/* 엔딩 케이크 및 선물 버튼 연출 */
+function showFinalCake() {
+  playSound('correct');
+  const cakeOverlay = document.getElementById('cakeOverlay');
+  const cakeImg = document.getElementById('cakeImg');
+  const endContainer = document.getElementById('endContainer');
+
+  cakeOverlay.classList.add('active');
+  setTimeout(() => {
+    cakeImg.classList.add('zoom');
+  }, 300);
+
+  setTimeout(() => {
+    endContainer.classList.add('show');
+  }, 1200);
+}
+</script>
+</body>
+</html>
