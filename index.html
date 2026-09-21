@@ -3,7 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>쿠레하님의 특별한 생일 파티 🎉</title>
+<title>쿠레하의 생일 파티 🎉</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎂</text></svg>">
+</head>
 <!-- 폭죽 이펙트 라이브러리 -->
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 <style>
@@ -142,8 +144,27 @@ body {
   max-height: 100%;
   object-fit: contain;
   filter: drop-shadow(0 5px 8px rgba(0,0,0,0.5));
+  transform-origin: bottom center;
 }
 
+/* 아바타 반시계 방향 45도 회전 후 원상복귀 애니메이션 */
+.avatar-img.rotate-ccw-45 {
+  animation: rotateCcw45 0.5s ease-in-out forwards;
+}
+
+@keyframes rotateCcw45 {
+  0% {
+    transform: rotate(0deg);
+  }
+  35% {
+    transform: rotate(-45deg);
+  }
+  100% {
+    transform: rotate(0deg);
+  }
+}
+
+/* 🪳 미세하게 무작위로 떨리는 애니메이션 */
 .cockroach-face {
   position: absolute;
   top: 30px;
@@ -152,10 +173,13 @@ body {
   height: 75px;
   object-fit: contain;
   z-index: 4;
+  animation: twitch 0.12s infinite ease-in-out alternate;
 }
 
+/* 처음 등장 시 회전하며 나타나는 애니메이션 */
 .cockroach-face.rotate-transform {
-  animation: spinSlideIn 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+  animation: spinSlideIn 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards,
+             twitch 0.12s infinite 0.8s ease-in-out alternate;
 }
 
 @keyframes spinSlideIn {
@@ -166,6 +190,27 @@ body {
   100% {
     transform: translateX(0) rotateY(0deg) scale(1);
     opacity: 1;
+  }
+}
+
+@keyframes twitch {
+  0% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+  20% {
+    transform: translate(-1.5px, 1px) rotate(-1.5deg);
+  }
+  40% {
+    transform: translate(1px, -1.5px) rotate(1deg);
+  }
+  60% {
+    transform: translate(-1px, -0.5px) rotate(-0.5deg);
+  }
+  80% {
+    transform: translate(1.5px, 1px) rotate(1.5deg);
+  }
+  100% {
+    transform: translate(-0.5px, 1.5px) rotate(-1deg);
   }
 }
 
@@ -217,6 +262,7 @@ body {
   top: 50px;
   left: 16px;
   right: 16px;
+  height: 180px;
   z-index: 5;
   display: flex;
   flex-direction: column;
@@ -233,7 +279,9 @@ body {
   text-align: left;
   cursor: pointer;
   box-shadow: 0 4px 8px rgba(0,0,0,0.3);
-  transition: transform 0.1s;
+  transition: transform 0.2s ease, left 0.2s ease, top 0.2s ease, width 0.2s ease;
+  position: relative;
+  width: 100%;
 }
 .btn-option:active {
   transform: scale(0.97);
@@ -286,7 +334,40 @@ body {
   box-shadow: 0 2px 0 #780808;
 }
 
-/* 케이크 및 엔딩 연출 레이어 */
+.emoji-burst-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 25;
+  overflow: hidden;
+}
+.particle-emoji {
+  position: absolute;
+  top: 40%;
+  left: 50%;
+  font-size: 32px;
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+  animation: emojiExplode 1.8s cubic-bezier(0.08, 0.8, 0.25, 1) forwards;
+}
+
+@keyframes emojiExplode {
+  0% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(0.3);
+  }
+  70% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(calc(-50% + var(--tx)), calc(-50% + var(--ty))) scale(1.6) rotate(var(--rot));
+  }
+}
+
 .cake-overlay {
   position: absolute;
   top: 0; left: 0; width: 100%; height: 100%;
@@ -322,7 +403,7 @@ body {
   align-items: center;
   gap: 12px;
   opacity: 0;
-  transition: opacity 0.5s ease 0.3s; /* 빠르게 등장하도록 대기시간 단축 */
+  transition: opacity 0.5s ease 0.3s;
   z-index: 35;
 }
 .end-container.show {
@@ -399,6 +480,8 @@ body {
     <button class="btn-enter" id="enterBtn" onclick="startStory()">입장하기</button>
   </div>
 
+  <div class="emoji-burst-container" id="emojiBurstContainer"></div>
+
   <div class="screen-content hidden" id="mainContent">
     <div class="action-panel" id="actionPanel"></div>
 
@@ -440,10 +523,8 @@ const IMAGE_CONFIG = {
   bgro: "./로비2.jpg"
 };
 
-/* 오디오 사운드 시스템 (사운드 효과, BGM, 생일축하곡) */
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 let bgmInterval = null;
-let happyBirthdayTimeout = null;
 
 function playSound(type) {
   if (audioCtx.state === 'suspended') audioCtx.resume();
@@ -483,7 +564,6 @@ function playSound(type) {
   }
 }
 
-/* 레트로 8비트 루프 배경음악 (BGM) */
 function startBGM() {
   if (audioCtx.state === 'suspended') audioCtx.resume();
   const notes = [261.63, 329.63, 392.00, 523.25, 392.00, 329.63];
@@ -510,12 +590,10 @@ function stopBGM() {
   }
 }
 
-/* 8비트 생일 축하 노래 연주 */
 function playHappyBirthdayMelody() {
   stopBGM();
   if (audioCtx.state === 'suspended') audioCtx.resume();
 
-  // 음고(Hz) 및 박자(초)
   const melody = [
     { f: 261.63, d: 0.3 }, { f: 261.63, d: 0.3 }, { f: 293.66, d: 0.6 }, { f: 261.63, d: 0.6 }, { f: 349.23, d: 0.6 }, { f: 329.63, d: 1.0 },
     { f: 261.63, d: 0.3 }, { f: 261.63, d: 0.3 }, { f: 293.66, d: 0.6 }, { f: 261.63, d: 0.6 }, { f: 392.00, d: 0.6 }, { f: 349.23, d: 1.0 },
@@ -539,27 +617,30 @@ function playHappyBirthdayMelody() {
   });
 }
 
-/* 시나리오 상태 데이터 */
 let currentStep = 0;
 let isWaitingChoice = false;
 
+let q2WrongStatus = { B: false, C: false };
+let q3WrongStatus = { A: false, C: false };
+
 const scriptData = [
-  { speaker: "직원1", text: "어서오세요...엇?", avatar: IMAGE_CONFIG.staff1, bg: "./로비.jpg" },
-  { speaker: "직원1", text: "아! 오늘 VVVVVVVIP로 예약하신 쿠레하님 맞으십니까?", avatar: IMAGE_CONFIG.staff1 },
-  { speaker: "직원1", text: "오카다님이 매우 귀중한 손님이라고 잘 모시라고 하셨거든요..", avatar: IMAGE_CONFIG.staff1 },
-  { speaker: "직원1", text: "잠시만요.. 입장하기 전에..", avatar: IMAGE_CONFIG.staff1 },
-  { speaker: "직원1", text: "오카다님께서 몇 가지 확인을 요청하셨습니다!!\n죄송합니다만 양해 부탁드립니다.", avatar: IMAGE_CONFIG.staff1 },
+  { speaker: "도그", text: "어서오세요...엇?", avatar: IMAGE_CONFIG.staff1, bg: "./로비.jpg", triggerRotate: true },
+  { speaker: "도그", text: "아! 오늘 VVVVVVVIP로 예약하신 쿠레하님 맞으십니까?", avatar: IMAGE_CONFIG.staff1 },
+  { speaker: "도그", text: "오카다님이 매우 귀중한 손님이라고 잘 모시라고 하셨거든요..", avatar: IMAGE_CONFIG.staff1 },
+  { speaker: "도그", text: "잠시만요.. 입장하기 전에..", avatar: IMAGE_CONFIG.staff1 },
+  { speaker: "도그", text: "오카다님께서 몇 가지 확인을 요청하셨습니다!!\n죄송합니다만 양해 부탁드립니다.", avatar: IMAGE_CONFIG.staff1, triggerRotate: true },
   { speaker: "시스템", text: "[ VIP 확인실로 이동합니다... ]", avatar: "" },
-  { speaker: "지배인 찰스", text: "안녕하세요. 본인확인 담당자입니다.", avatar: IMAGE_CONFIG.managerCharles, bg: "./로비2.jpg" },
-  { speaker: "지배인 찰스", text: "지금부터 몇 가지 문제를 드릴테니 맞히시면 됩니다.", avatar: IMAGE_CONFIG.managerCharles },
-  { speaker: "지배인 찰스", text: "1. 손님 나이가 어떻게 되십니까?", avatar: IMAGE_CONFIG.managerCharles, questionType: "age" },
-  { speaker: "지배인 찰스", text: "2. 취미가 어떻게 되십니까?", avatar: IMAGE_CONFIG.managerCharles, questionType: "hobby" },
-  { speaker: "지배인 찰스", text: "마지막 질문입니다.\n3. 좋아하는 음식은?", avatar: IMAGE_CONFIG.managerCharles, questionType: "food" },
-  { speaker: "지배인 찰스", text: "확인 정말 감사합니다. 안내해드리겠습니다.", avatar: IMAGE_CONFIG.managerCharles },
+  // 켓스 인사 및 안내 시 회전 모션 적용
+  { speaker: "켓스", text: "안녕하세요. 본인확인 담당자입니다.", avatar: IMAGE_CONFIG.managerCharles, bg: "./로비2.jpg", triggerRotate: true },
+  { speaker: "켓스", text: "지금부터 몇 가지 문제를 드릴테니 맞히시면 됩니다.", avatar: IMAGE_CONFIG.managerCharles },
+  { speaker: "켓스", text: "손님 나이가 어떻게 되십니까?", avatar: IMAGE_CONFIG.managerCharles, questionType: "age" },
+  { speaker: "켓스", text: "취미가 어떻게 되십니까?", avatar: IMAGE_CONFIG.managerCharles, questionType: "hobby" },
+  { speaker: "켓스", text: "마지막 질문입니다.\n좋아하는 음식은 무엇인가요?", avatar: IMAGE_CONFIG.managerCharles, questionType: "food" },
+  { speaker: "켓스", text: "확인 정말 감사합니다. 자리에 안내해드리겠습니다.", avatar: IMAGE_CONFIG.managerCharles, triggerRotate: true },
   { speaker: "오카다", text: "안녕 쿠레하", avatar: IMAGE_CONFIG.okadaNormal, bg: "./오카다만남.jpg" },
   { speaker: "오카다", text: "생일 축하해..", avatar: IMAGE_CONFIG.okadaNormal },
   { speaker: "오카다", text: "아 잠만.", avatar: IMAGE_CONFIG.okadaNormal },
-  { speaker: "오카다", text: "너가 좋아하는 얼굴로 얘기할게", avatar: IMAGE_CONFIG.okadaNormal, showCockroachFace: true, triggerTransform: true },
+  { speaker: "오카다", text: "너가 좋아하는 얼굴로 이야기할게", avatar: IMAGE_CONFIG.okadaNormal, showCockroachFace: true, triggerTransform: true },
   { speaker: "오카다", text: "우리가 2023년에 만났는데 벌써 2026년이구나", avatar: IMAGE_CONFIG.okadaNormal, showCockroachFace: true },
   { speaker: "오카다", text: "너랑 처음에는 이렇게 친해질 줄은 몰랐는데 계속 좋은 친구로 지내서 너무 좋아", avatar: IMAGE_CONFIG.okadaNormal, showCockroachFace: true },
   { speaker: "오카다", text: "오늘 생일 정말 축하해! happy birthday 🎉", avatar: IMAGE_CONFIG.okadaNormal, showCockroachFace: true, isFinal: true }
@@ -567,13 +648,14 @@ const scriptData = [
 
 function startStory() {
   playSound('next');
-  startBGM(); // 게임 시작 시 BGM 시작
+  startBGM();
+
+  // 버튼을 누르는 즉시 메인 콘텐츠를 보여주고 커튼을 올립니다.
+  document.getElementById('mainContent').classList.remove('hidden');
+  renderStep();
 
   const curtain = document.getElementById('curtainLayer');
   curtain.classList.add('open');
-  
-  document.getElementById('mainContent').classList.remove('hidden');
-  renderStep();
 }
 
 function renderStep() {
@@ -597,6 +679,14 @@ function renderStep() {
   if (data.avatar) {
     avatarImg.src = data.avatar;
     document.getElementById('avatarContainer').classList.remove('hidden');
+    
+    if (data.triggerRotate) {
+      avatarImg.classList.remove('rotate-ccw-45');
+      void avatarImg.offsetWidth;
+      avatarImg.classList.add('rotate-ccw-45');
+    } else {
+      avatarImg.classList.remove('rotate-ccw-45');
+    }
   } else {
     document.getElementById('avatarContainer').classList.add('hidden');
   }
@@ -671,24 +761,39 @@ function showHobbyOptions() {
   document.getElementById('nextIndicator').classList.add('hidden');
   const panel = document.getElementById('actionPanel');
   panel.innerHTML = `
-    <button class="btn-option" onclick="selectHobby('A')">A: 집에서 뒹굴뒹굴</button>
+    <button class="btn-option" id="correctBtnQ2" 
+            onmouseover="fleeButton('Q2')" 
+            ontouchstart="fleeButton('Q2')"
+            onclick="selectHobby('A')">A: 집에서 뒹굴뒹굴</button>
     <button class="btn-option" onclick="selectHobby('B')">B: 즐겁게 공부하기</button>
     <button class="btn-option" onclick="selectHobby('C')">C: 맨날 밖에 나가서 놀기</button>
   `;
 }
 
 function selectHobby(choice) {
+  const isQ2AllWrongClicked = q2WrongStatus.B && q2WrongStatus.C;
+
   if (choice === 'A') {
+    if (!isQ2AllWrongClicked) {
+      fleeButton('Q2');
+      return;
+    }
     playSound('correct');
     document.getElementById('actionPanel').innerHTML = '';
-    document.getElementById('dialogText').innerText = "히키코모리시군요.";
+    document.getElementById('dialogText').innerText = "히키코모리군요.";
     isWaitingChoice = false;
     document.getElementById('nextIndicator').classList.remove('hidden');
   } else if (choice === 'B') {
+    q2WrongStatus.B = true;
+    checkAndResetBtn('Q2');
     playSound('wrong');
+    triggerEmojiExplosion("📚");
     document.getElementById('dialogText').innerText = "그럴수가..";
   } else {
+    q2WrongStatus.C = true;
+    checkAndResetBtn('Q2');
     playSound('wrong');
+    triggerEmojiExplosion("🏃");
     document.getElementById('dialogText').innerText = "체력 좋으시네요.";
   }
 }
@@ -699,25 +804,103 @@ function showFoodOptions() {
   const panel = document.getElementById('actionPanel');
   panel.innerHTML = `
     <button class="btn-option" onclick="selectFood('A')">A: 바퀴벌레</button>
-    <button class="btn-option" onclick="selectFood('B')">B: 한식</button>
+    <button class="btn-option" id="correctBtnQ3" 
+            onmouseover="fleeButton('Q3')" 
+            ontouchstart="fleeButton('Q3')"
+            onclick="selectFood('B')">B: 한식</button>
     <button class="btn-option" onclick="selectFood('C')">C: 똥</button>
   `;
 }
 
 function selectFood(choice) {
+  const isQ3AllWrongClicked = q3WrongStatus.A && q3WrongStatus.C;
+
   if (choice === 'B') {
+    if (!isQ3AllWrongClicked) {
+      fleeButton('Q3');
+      return;
+    }
     playSound('correct');
     document.getElementById('actionPanel').innerHTML = '';
     document.getElementById('dialogText').innerText = "한식 맛있죠.";
     isWaitingChoice = false;
     document.getElementById('nextIndicator').classList.remove('hidden');
-  } else {
+  } else if(choice === 'A'){
+    q3WrongStatus.A = true;
+    checkAndResetBtn('Q3');
     playSound('wrong');
-    document.getElementById('dialogText').innerText = "웩... 더러워..";
+    triggerEmojiExplosion("🪳");
+    document.getElementById('dialogText').innerText = "좋은 단백질이죠...";
+  } else {
+    q3WrongStatus.C = true;
+    checkAndResetBtn('Q3');
+    playSound('wrong');
+    triggerEmojiExplosion("💩");
+    document.getElementById('dialogText').innerText = "웩..더러워..";
   }
 }
 
-/* 화려한 폭죽 연속 발사 함수 */
+function fleeButton(qType) {
+  let btnId = (qType === 'Q2') ? 'correctBtnQ2' : 'correctBtnQ3';
+  let isAllClicked = (qType === 'Q2') ? (q2WrongStatus.B && q2WrongStatus.C) : (q3WrongStatus.A && q3WrongStatus.C);
+
+  if (!isAllClicked) {
+    const btn = document.getElementById(btnId);
+    if (btn) {
+      const randomLeft = Math.floor(Math.random() * 40) - 20;
+      btn.style.position = 'relative';
+      btn.style.left = randomLeft + '%';
+      btn.style.top = '0px';
+      btn.style.width = '65%';
+      btn.style.transform = 'scale(0.8)';
+    }
+  }
+}
+
+function checkAndResetBtn(qType) {
+  let btnId = (qType === 'Q2') ? 'correctBtnQ2' : 'correctBtnQ3';
+  let isAllClicked = (qType === 'Q2') ? (q2WrongStatus.B && q2WrongStatus.C) : (q3WrongStatus.A && q3WrongStatus.C);
+
+  if (isAllClicked) {
+    const btn = document.getElementById(btnId);
+    if (btn) {
+      btn.style.position = 'relative';
+      btn.style.left = '0px';
+      btn.style.top = '0px';
+      btn.style.width = '100%';
+      btn.style.transform = 'scale(1)';
+    }
+  }
+}
+
+function triggerEmojiExplosion(emojiChar) {
+  const container = document.getElementById('emojiBurstContainer');
+  container.innerHTML = '';
+
+  const particleCount = 12;
+  for (let i = 0; i < particleCount; i++) {
+    const el = document.createElement('div');
+    el.className = 'particle-emoji';
+    el.innerText = emojiChar;
+
+    const angle = (i / particleCount) * 360 + (Math.random() * 20 - 10);
+    const distance = 100 + Math.random() * 70;
+    const tx = Math.cos(angle * Math.PI / 180) * distance + 'px';
+    const ty = Math.sin(angle * Math.PI / 180) * distance + 'px';
+    const rot = (Math.random() * 360 - 180) + 'deg';
+
+    el.style.setProperty('--tx', tx);
+    el.style.setProperty('--ty', ty);
+    el.style.setProperty('--rot', rot);
+
+    container.appendChild(el);
+  }
+
+  setTimeout(() => {
+    container.innerHTML = '';
+  }, 1850);
+}
+
 function triggerFireworks() {
   const duration = 4 * 1000;
   const animationEnd = Date.now() + duration;
@@ -738,10 +921,9 @@ function triggerFireworks() {
   }, 250);
 }
 
-/* 엔딩 케이크, 생일축하곡 및 선물 버튼 연출 */
 function showFinalCake() {
-  playHappyBirthdayMelody(); // 생일 축하 음악 재생
-  triggerFireworks();       // 화려한 폭죽 발사
+  playHappyBirthdayMelody();
+  triggerFireworks();
 
   const cakeOverlay = document.getElementById('cakeOverlay');
   const cakeImg = document.getElementById('cakeImg');
@@ -753,7 +935,6 @@ function showFinalCake() {
     cakeImg.classList.add('zoom');
   }, 100);
 
-  // 대기시간을 대폭 단축해 The END와 선물버튼이 빠르게 표출됨
   setTimeout(() => {
     endContainer.classList.add('show');
   }, 300);
